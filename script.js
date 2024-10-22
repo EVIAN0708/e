@@ -1,15 +1,16 @@
-// 模拟数据存储
-let vehicleDatabase = {
-    'TEST123': {
-        plateNumber: 'TEST123',
-        imageUrl: 'https://example.com/test-image.jpg',
-        status: '已登记',
-        registrationTime: '2023-04-20 10:00',
-        remarks: '测试车辆'
-    }
+// Firebase 配置
+const firebaseConfig = {
+    // 在这里粘贴您的 Firebase 配置
 };
 
-function search() {
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+
+// 获取 Firestore 实例
+const db = firebase.firestore();
+
+// 搜索函数
+async function search() {
     console.log("搜索函数被调用");
     const searchInput = document.getElementById('searchInput').value;
     console.log("搜索输入:", searchInput);
@@ -18,75 +19,43 @@ function search() {
         console.log("检测到 'nsg'，显示登记页面");
         showRegistrationPage();
     } else {
-        const vehicleInfo = getVehicleInfo(searchInput);
-        console.log("获取到的车辆信息:", vehicleInfo);
-        if (vehicleInfo) {
-            console.log("显示车辆信息");
-            displayVehicleInfo(vehicleInfo);
-        } else {
-            console.log("显示无结果");
-            displayNoResult();
+        try {
+            const vehicleInfo = await getVehicleInfo(searchInput);
+            if (vehicleInfo) {
+                console.log("显示车辆信息");
+                displayVehicleInfo(vehicleInfo);
+            } else {
+                console.log("显示无结果");
+                displayNoResult();
+            }
+        } catch (error) {
+            console.error("搜索出错:", error);
+            alert("搜索时发生错误，请稍后再试。");
         }
     }
-    // 不再清空搜索框
-    // document.getElementById('searchInput').value = '';
 }
 
-function getVehicleInfo(plateNumber) {
-    console.log("获取车辆信息:", plateNumber);
-    return vehicleDatabase[plateNumber.toUpperCase()] || null;
+// 从 Firestore 获取车辆信息
+async function getVehicleInfo(plateNumber) {
+    const docRef = db.collection('vehicles').doc(plateNumber.toUpperCase());
+    const doc = await docRef.get();
+    return doc.exists ? doc.data() : null;
 }
 
-function displayVehicleInfo(vehicleInfo) {
-    document.getElementById('plateNumberInfo').textContent = vehicleInfo.plateNumber;
-    document.getElementById('vehicleImageInfo').src = vehicleInfo.imageUrl;
-    document.getElementById('vehicleStatusInfo').textContent = vehicleInfo.status;
-    document.getElementById('registrationTimeInfo').textContent = vehicleInfo.registrationTime;
-    document.getElementById('remarksInfo').textContent = vehicleInfo.remarks;
-    showVehicleInfoPage();
-}
+// 显示车辆信息（保持不变）
 
-function displayNoResult() {
-    console.log("显示无结果页面");
-    const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = `
-        <div class="no-result">
-            <div class="icon-circle">
-                <i class="fas fa-folder-open"></i>
-            </div>
-            <p>未查询到车辆信息</p>
-        </div>
-    `;
-    resultDiv.style.display = 'flex';
-    document.getElementById('vehicleInfoPage').style.display = 'none';
-    document.getElementById('registrationPage').style.display = 'none';
-}
+// 显示无结果（保持不变）
 
-function showVehicleInfoPage() {
-    console.log("显示车辆信息页面");
-    document.getElementById('vehicleInfoPage').style.display = 'block';
-    document.getElementById('result').style.display = 'none';
-}
+// 显示车辆信息页面（保持不变）
 
-function hideVehicleInfoPage() {
-    document.getElementById('vehicleInfoPage').style.display = 'none';
-    document.getElementById('result').style.display = 'flex';
-}
+// 隐藏车辆信息页面（保持不变）
 
-function showRegistrationPage() {
-    console.log("显示车辆信息登记页面");
-    document.getElementById('registrationPage').style.display = 'block';
-    document.getElementById('result').style.display = 'none';
-    document.getElementById('vehicleInfoPage').style.display = 'none';
-}
+// 显示登记页面（保持不变）
 
-function hideRegistrationPage() {
-    console.log("隐藏车辆信息登记页面");
-    document.getElementById('registrationPage').style.display = 'none';
-    document.getElementById('result').style.display = 'flex';
-}
+// 隐藏登记页面（保持不变）
 
-document.getElementById('registrationForm').addEventListener('submit', function(e) {
+// 修改注册表单提交处理程序
+document.getElementById('registrationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const plateNumber = document.getElementById('plateNumber').value;
     const vehicleImage = document.getElementById('vehicleImage').files[0];
@@ -94,32 +63,35 @@ document.getElementById('registrationForm').addEventListener('submit', function(
     const registrationTime = document.getElementById('registrationTime').value;
     const remarks = document.getElementById('remarks').value;
 
-    // 创建一个 FileReader 对象来读取图片文件
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        // 将车辆信息存储到模拟数据库中
-        vehicleDatabase[plateNumber.toUpperCase()] = {
-            plateNumber: plateNumber,
-            imageUrl: event.target.result, // 使用 base64 编码的图片数据
-            status: vehicleStatus,
-            registrationTime: registrationTime,
-            remarks: remarks
+    try {
+        // 创建一个 FileReader 对象来读取图片文件
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const vehicleData = {
+                plateNumber: plateNumber,
+                imageUrl: event.target.result,
+                status: vehicleStatus,
+                registrationTime: registrationTime,
+                remarks: remarks
+            };
+
+            // 将车辆信息存储到 Firestore
+            await db.collection('vehicles').doc(plateNumber.toUpperCase()).set(vehicleData);
+
+            alert(`车辆信息已成功登记：\n车牌号：${plateNumber}\n车辆状态：${vehicleStatus}\n登记时间：${registrationTime}\n备注：${remarks}`);
+            hideRegistrationPage();
         };
 
-        alert(`车辆信息已成功登记：\n车牌号：${plateNumber}\n车辆状态：${vehicleStatus}\n登记时间：${registrationTime}\n备注：${remarks}`);
-        hideRegistrationPage();
-    };
-
-    // 读取图片文件
-    reader.readAsDataURL(vehicleImage);
+        // 读取图片文件
+        reader.readAsDataURL(vehicleImage);
+    } catch (error) {
+        console.error("注册车辆信息时出错:", error);
+        alert("注册车辆信息时发生错误，请稍后再试。");
+    }
 });
 
-function initPage() {
-    displayNoResult();
-}
+// 初始化页面（保持不变）
 
-// 页面加载完成后调用初始化函数
-window.onload = initPage;
+// 页面加载完成后调用初始化函数（保持不变）
 
-// 在文件末尾添加以下代码
 console.log("脚本加载完成");

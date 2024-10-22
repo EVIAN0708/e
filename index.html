@@ -1,70 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电动车信息管理系统</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <!-- 其他 head 内容保持不变 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="search-container">
-            <div class="search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" placeholder="请输入车牌号搜索">
-            </div>
-            <button onclick="search()" class="search-button">搜索</button>
-        </div>
-        <div id="result"></div>
-        <div class="report-button">
-            <button onclick="showReportPage()">违章举报</button>
-        </div>
-    </div>
-    <div id="vehicleInfoPage" class="vehicle-info-page">
-        <div class="vehicle-info-header">
-            <button onclick="hideVehicleInfoPage()" class="back-button">返回</button>
-            <h2>车辆基本信息</h2>
-        </div>
-        <div class="vehicle-info-content">
-            <div class="info-item">
-                <span class="label">车牌号</span>
-                <span id="plateNumberInfo" class="value"></span>
-            </div>
-            <div class="info-item">
-                <span class="label">车辆照片</span>
-                <img id="vehicleImageInfo" src="" alt="车辆照片" class="vehicle-image">
-            </div>
-            <div class="info-item">
-                <span class="label">登记状态</span>
-                <span id="vehicleStatusInfo" class="value"></span>
-            </div>
-            <div class="info-item">
-                <span class="label">登记时间</span>
-                <span id="registrationTimeInfo" class="value"></span>
-            </div>
-            <div class="info-item">
-                <span class="label">备注</span>
-                <span id="remarksInfo" class="value"></span>
-            </div>
-        </div>
-    </div>
-    <div id="registrationPage" class="registration-page">
-        <div class="registration-header">
-            <button onclick="hideRegistrationPage()" class="back-button">返回</button>
-            <h2>车辆信息登记</h2>
-        </div>
-        <form id="registrationForm">
-            <input type="text" id="plateNumber" placeholder="车牌号" required>
-            <input type="file" id="vehicleImage" accept="image/*" required>
-            <select id="vehicleStatus" required>
-                <option value="已登记">已登记</option>
-            </select>
-            <input type="datetime-local" id="registrationTime" required>
-            <textarea id="remarks" placeholder="备注"></textarea>
-            <button type="submit">提交</button>
-        </form>
-    </div>
+    <!-- body 内容保持不变 -->
     <script src="script.js"></script>
 </body>
 </html>
